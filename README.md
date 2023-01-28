@@ -1,8 +1,11 @@
 # PSX-Proxy-Panel
-Frontend for PSX Proxy server \
+Frontend for PSX Proxy server 
+
+## Screenshot
+![Psx proxy application frontend screenshot](https://github.com/mez0ru/PSX-Proxy-Panel/blob/main/Screenshot%202023-01-28%20at%2023-34-38%20PSX%20Web%20Application.png?raw=true)
 
 ## Stack
-Uses Tailwind + HeadlessUI + React, has minimum dependencies. \
+Uses Tailwind + HeadlessUI + React.
 
 ## About
 The UI is done from the ground-up by myself, the frontend is designed to be a SWA \
@@ -12,3 +15,7 @@ The goal is to make it easier to maintain new games, have a better presentabilit
 more functionalities for the backend proxy server. \
 Eventually the old "Automatic game updates" standalone program will be migrated to the proxy server, \
 for better maintability and better user experience.
+
+## License
+Whatever license, the backend code is proprietary while the frontend is opensource; \
+however, leave credit where credit is due.
