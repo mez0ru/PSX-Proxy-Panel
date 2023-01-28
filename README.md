@@ -18,4 +18,4 @@ for better maintability and better user experience.
 
 ## License
 Whatever license, the backend code is proprietary while the frontend is opensource; \
-however, leave credit where credit is due.
+however, leave credit where credit is due if you plan on using it.
