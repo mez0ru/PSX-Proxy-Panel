@@ -30,10 +30,11 @@ export default function GameCard({ name, code, image, version, full_game = false
             {console === 4 ?
                 (<span className="bg-purple-100 text-purple-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">PS4</span>) :
                 (<span className="bg-blue-100 text-blue-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">PS5</span>)}
-            {full_game && <span className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">Full Game</span>
-            }
+            {full_game && <><span className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">Full Game</span>
+                <br />
+            </>}
             {!auto_updates && <span className="bg-red-100 text-red-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">New</span>}
-            <br />
+
             <span className="bg-pink-100 text-pink-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">{version}</span>
             <span className="bg-pink-100 text-pink-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">{region}</span>
             <br />

@@ -48,8 +48,8 @@ function renderButtons(operation: number, isGameAdded: boolean, onClick: React.M
             </div>
                 <button
                     type="button" disabled={path && passcode ? false : true}
-                    className="inline-flex justify-center mt-1 rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:bg-gray-100 disabled:text-gray-400"
-                    onClick={dismiss}
+                    className="inline-flex justify-center mt-1 rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:bg-gray-100 disabled:text-gray-400"
+                    onClick={onClick}
                 >
                     Confirm
                 </button>
