@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownload } from '@fortawesome/free-solid-svg-icons/fadownload'
 
@@ -18,13 +17,8 @@ interface GameCardProps {
 }
 
 export default function GameCard({ name, code, image, version, full_game = false, region, downloads = 0, console = 4, auto_updates = false, onClick }: GameCardProps) {
-    const [isHidden, setIsHidden] = useState(true)
-    useEffect(() => {
-        setIsHidden(false)
-    })
-
     return (
-        <div className={`shadow-lg rounded-[7px] ${auto_updates ? 'border-lime-700' : 'border-violet-700'} border-2 pb-3 hover:shadow-xl ${auto_updates ? 'hover:bg-lime-700' : 'hover:bg-violet-700'} hover:text-white duration-300 transition-all hover:-translate-y-1 hover:scale-102 cursor-pointer ${isHidden ? 'opacity-0' : ''}`} onClick={() => onClick(code, name)}>
+        <div className={`shadow-lg rounded-[7px] ${auto_updates ? 'border-lime-700' : 'border-violet-700'} border-2 pb-3 hover:shadow-xl ${auto_updates ? 'hover:bg-lime-700' : 'hover:bg-violet-700'} hover:text-white duration-300 hover:-translate-y-1 hover:scale-102 cursor-pointer`} onClick={() => onClick(code, name)}>
             <img src={image} alt={`${name} Cover`} className='rounded-t-[5px] mb-3' />
             <h5 className="font-['Ubuntu_Mono'] tracking-tighter">{name}</h5>
             {console === 4 ?

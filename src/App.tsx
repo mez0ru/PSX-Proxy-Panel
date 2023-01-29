@@ -6,6 +6,7 @@ import GameCard from './components/GameCard'
 import not_found from './assets/not_found.svg'
 import Footer from './components/Footer'
 import Alert from './components/Alert'
+import Loading from './components/Loading'
 
 interface Game {
   name: string;
@@ -41,8 +42,6 @@ const MESSAGE_TYPES = {
   SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM: 12,
 }
 
-let socket: WebSocket
-
 function App() {
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
@@ -55,27 +54,26 @@ function App() {
   const [connected, setConnected] = useState(false)
   const [path, setPath] = useState('')
   const [passcode, setPasscode] = useState('')
-
-  console.log(window.location.hostname);
+  const [socket, setSocket] = useState<WebSocket>()
 
   useEffect(() => {
     function connect() {
-      socket = new WebSocket(`ws://${window.location.hostname}:8089`);
+      const sock = new WebSocket(`ws://${window.location.hostname}:8089`);
 
-      socket.addEventListener('open', (event) => {
+      sock.addEventListener('open', (event) => {
         setConnected(true);
-        socket.send(JSON.stringify({
+        sock.send(JSON.stringify({
           type: MESSAGE_TYPES.GET_ALL_GAMES
         }));
       });
 
-      socket.addEventListener('close', (event) => {
+      sock.addEventListener('close', (event) => {
         setConnected(false);
         console.log('disconnected, will reconnect after 1s...');
         setTimeout(connect, 1000)
       });
 
-      socket.addEventListener('message', (event) => {
+      sock.addEventListener('message', (event) => {
         const data = JSON.parse(event.data)
         switch (data.type) {
           case MESSAGE_TYPES.GAME: {
@@ -87,18 +85,15 @@ function App() {
                 newArray[game_index] = game;
                 return newArray
               } else {
-                console.log('added game')
                 if (newArray.length > 29)
                   newArray.shift()
                 return [...newArray, game]
               }
             })
           }
-            // console.log(game)
             break;
           case MESSAGE_TYPES.IS_JDOWNLOADER_RUNNING:
             setIsJdownloaderRunning(data.value)
-            console.log('jdownload haha')
             break;
           case MESSAGE_TYPES.GAME_ICON: {
             const game = data.game as Game;
@@ -109,7 +104,6 @@ function App() {
                 newArray[game_index].image = game.image;
                 return newArray
               } else {
-                console.log('added game')
                 if (newArray.length > 29)
                   newArray.shift()
                 return [...newArray, game]
@@ -143,12 +137,10 @@ function App() {
 
             break;
           case MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH: {
-            console.log('received empty')
             setPath(data.value)
           }
             break;
           case MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM: {
-            console.log('SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM')
             if (data.value) {
               setOperation(OPERATION.INFO);
               setTitle("Info")
@@ -165,10 +157,12 @@ function App() {
             break;
         }
       });
+
+      setSocket(sock);
     }
     connect();
     return () => {
-      socket.close();
+      socket?.close();
     }
 
   }, []);
@@ -193,15 +187,13 @@ function App() {
         setTitle(`Change games.txt path`);
         setMessage(`YOU MUST NOT CHANGE THE PATH, THIS IS THE ADMINISTRATOR'S JOB.`);
         setOperation(OPERATION.INPUT);
-        socket.send(JSON.stringify({ type: MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH }))
+        socket?.send(JSON.stringify({ type: MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH }))
         break;
 
     }
 
     setIsOpen(true);
   }
-
-
 
   const addRequestedGame = (code: string, title: string) => {
     const game = requestedGames.find((e) => e.code === code) || {} as Game;
@@ -227,19 +219,17 @@ function App() {
   }
 
   const confirmAddingGameToAutoUpdates = () => {
-    socket.send(JSON.stringify({
+    socket?.send(JSON.stringify({
       type: MESSAGE_TYPES.ADD_GAME_TO_AUTO_UPDATES,
       game: selectedGame,
     }))
-    console.log('sent!')
   }
 
   const confirmGamesPath = () => {
-    socket.send(JSON.stringify({
+    socket?.send(JSON.stringify({
       type: MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM,
       passcode, value: path,
     }))
-    console.log('confirmGamesPath sent!')
   }
 
   return (
@@ -264,25 +254,12 @@ function App() {
                   <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} onClick={addRequestedGame} />
                 ))}
               </div>
-            </> :
-            <>
-              <center role="status" className="table">
-                <svg aria-hidden="true" className="table-cell inline w-7 h-7 sm:w-10 sm:h-10 mr-2 text-gray-200 animate-spin fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                </svg>
-                <span className="sr-only">Loading...</span>
-                <h1 className="text-xl sm:text-4xl md:text-5xl table-cell font-['Montserrat'] align-middle table-cell">Please Wait</h1>
-              </center>
-
-            </>
+            </> : <Loading />
           }
 
         </section>
         <Footer marginfull={connected} onClick={FooterOnClick} />
       </div>
-
-
       <MyModal title={title} message={message} isOpen={isOpen} setIsOpen={setIsOpen} confirmAction={operation === OPERATION.INPUT ? confirmGamesPath : confirmAddingGameToAutoUpdates} isGameAdded={selectedGame.auto_updates || false} operation={operation} passcode={passcode} setPasscode={setPasscode} path={path} setPath={setPath} />
     </div>
   )

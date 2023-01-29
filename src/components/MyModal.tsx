@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useState } from 'react'
+import { Fragment } from 'react'
 
 export const OPERATION = {
     ADD_GAME_TO_AUTO_UPDATES: 0,
