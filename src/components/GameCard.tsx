@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownload } from '@fortawesome/free-solid-svg-icons/fadownload'
+import { useEffect, useState } from 'react';
 
 type ClickFunction = (code: string, title: string) => void;
 
@@ -12,16 +13,20 @@ interface GameCardProps {
     full_game?: boolean;
     downloads?: number;
     version: string;
-    console?: number;
     onClick: ClickFunction;
 }
 
-export default function GameCard({ name, code, image, version, full_game = false, region, downloads = 0, console = 4, auto_updates = false, onClick }: GameCardProps) {
+export default function GameCard({ name, code, image, version, full_game = false, region, downloads = 0, auto_updates = false, onClick }: GameCardProps) {
+    const [show, setShow] = useState(false)
+    useEffect(() => {
+        setShow(true);
+    }, [])
+
     return (
-        <div className={`shadow-lg rounded-[7px] ${auto_updates ? 'border-lime-700' : 'border-violet-700'} border-2 pb-3 hover:shadow-xl ${auto_updates ? 'hover:bg-lime-700' : 'hover:bg-violet-700'} hover:text-white duration-300 hover:-translate-y-1 hover:scale-102 cursor-pointer`} onClick={() => onClick(code, name)}>
+        <div className={`shadow-lg rounded-[7px] ${auto_updates ? 'border-lime-700' : 'border-violet-700'} border-2 pb-3 hover:shadow-xl ${auto_updates ? 'hover:bg-lime-700' : 'hover:bg-violet-700'} hover:text-white hover:-translate-y-1 hover:scale-102 cursor-pointer ${show ? 'opacity-100 duration-300' : 'opacity-0 duration-1000'}`} onClick={() => onClick(code, name)}>
             <img src={image} alt={`${name} Cover`} className='rounded-t-[5px] mb-3' />
             <h5 className="font-['Ubuntu_Mono'] tracking-tighter">{name}</h5>
-            {console === 4 ?
+            {code.startsWith('CUSA') ?
                 (<span className="bg-purple-100 text-purple-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">PS4</span>) :
                 (<span className="bg-blue-100 text-blue-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">PS5</span>)}
             {full_game && <><span className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-1.5 px-1.5 py-0.5 rounded-full">Full Game</span>

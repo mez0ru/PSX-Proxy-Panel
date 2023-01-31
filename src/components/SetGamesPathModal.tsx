@@ -2,8 +2,8 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 
 export const OPERATION = {
-    CONFIRMATION: 0,
-    INFO: 1,
+    INFO: 0,
+    INPUT: 1,
 }
 
 export interface MessageProps {
@@ -17,25 +17,31 @@ interface ModalProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     confirmAction: React.MouseEventHandler<HTMLButtonElement>;
+
+    path: string;
+    setPath: React.Dispatch<React.SetStateAction<string>>;
+    passcode: string;
+    setPasscode: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function renderButtons(operation: number, onClick: React.MouseEventHandler<HTMLButtonElement>, dismiss: React.MouseEventHandler<HTMLButtonElement>) {
+function renderButtons(operation: number, onClick: React.MouseEventHandler<HTMLButtonElement>, dismiss: React.MouseEventHandler<HTMLButtonElement>, passcode: string, setPasscode: React.Dispatch<React.SetStateAction<string>>, path: string, setPath: React.Dispatch<React.SetStateAction<string>>) {
     switch (operation) {
-        case OPERATION.CONFIRMATION:
-            return <><button
-                type="button"
-                className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 mr-3 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                onClick={onClick}
-            >
-                Confirm
-            </button>
+        case OPERATION.INPUT:
+            return <><div className="mb-6">
+                <label htmlFor="passcode" className="block mb-2 text-sm font-medium text-gray-900">Passcode</label>
+                <input type="password" id="passcode" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring focus:outline-none focus:ring-red-500 focus:border-red-500 block w-full p-2.5" placeholder="Passcode" required value={passcode} onChange={(e) => setPasscode(e.currentTarget.value)} />
+                <label htmlFor="path" className="block mt-4 mb-2 text-sm font-medium text-gray-900">New Path</label>
+                <input type="text" id="path" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring focus:outline-none focus:ring-red-500 focus:border-red-500 block w-full p-2.5" placeholder="C:\Users\example\..\games.txt" required value={path} onChange={(e) => setPath(e.currentTarget.value)} />
+            </div>
                 <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    onClick={dismiss}
+                    type="button" disabled={path && passcode ? false : true}
+                    className="inline-flex justify-center mt-1 rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:bg-gray-100 disabled:text-gray-400"
+                    onClick={onClick}
                 >
-                    Dismiss
-                </button></>
+                    Confirm
+                </button>
+            </>
+            break;
         default:
             return <button
                 type="button"
@@ -47,7 +53,7 @@ function renderButtons(operation: number, onClick: React.MouseEventHandler<HTMLB
     }
 }
 
-export function MyModal({ messageProps, isOpen, setIsOpen, confirmAction }: ModalProps) {
+export function SetGamesPathModal({ messageProps, isOpen, setIsOpen, confirmAction, passcode, setPasscode, path, setPath }: ModalProps) {
     // let [isOpen, setIsOpen] = useState(true)
 
     function closeModal() {
@@ -92,7 +98,7 @@ export function MyModal({ messageProps, isOpen, setIsOpen, confirmAction }: Moda
                                 </div>
 
                                 <div className="mt-4">
-                                    {renderButtons(messageProps.operation, confirmAction, closeModal)}
+                                    {renderButtons(messageProps.operation, confirmAction, closeModal, passcode, setPasscode, path, setPath)}
                                 </div>
                             </Dialog.Panel>
                         </Transition.Child>

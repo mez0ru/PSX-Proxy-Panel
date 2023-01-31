@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
-import { OPERATION, MyModal } from './components/MyModal'
+import { OPERATION, MyModal, MessageProps } from './components/MyModal'
 import GameCard from './components/GameCard'
 import not_found from './assets/not_found.svg'
 import Footer from './components/Footer'
 import Alert from './components/Alert'
 import Loading from './components/Loading'
+import { SocketContext } from './SocketContext'
 
 interface Game {
   name: string;
@@ -27,7 +28,7 @@ interface Game_From_Server {
   game: Game;
 }
 
-const MESSAGE_TYPES = {
+export const MESSAGE_TYPES = {
   GAME: 1,
   LOG: 2,
   IS_JDOWNLOADER_RUNNING: 3,
@@ -43,18 +44,17 @@ const MESSAGE_TYPES = {
 }
 
 function App() {
-  const [title, setTitle] = useState('')
-  const [message, setMessage] = useState('')
+  const [modalProps, setModalProps] = useState<MessageProps>({ title: '', message: '', operation: 0 })
   const [isOpen, setIsOpen] = useState(false)
   const [isJdownloaderRunning, setIsJdownloaderRunning] = useState(true)
   const [requestedGames, setRequestedGames] = useState([] as Game[])
   const [selectedGame, setSelectedGame] = useState({} as Game)
-  const [operation, setOperation] = useState(0)
+
   const [isGamesPathSet, setIsGamesPathSet] = useState(true)
   const [connected, setConnected] = useState(false)
   const [path, setPath] = useState('')
   const [passcode, setPasscode] = useState('')
-  const [socket, setSocket] = useState<WebSocket>()
+  const [socket, setSocket] = useState<WebSocket>();
 
   useEffect(() => {
     function connect() {
@@ -126,13 +126,11 @@ function App() {
                 const game_index = newArray.findIndex((e) => e.code === data.code);
                 newArray[game_index].auto_updates = true;
                 setSelectedGame(newArray[game_index]);
-                setTitle(`Info!`);
-                setMessage(`Congratulations, the game is added successfully!`);
+                setModalProps({ title: `Info`, message: `Congratulations, the game is added successfully!`, operation: OPERATION.INFO });
                 return newArray
               })
             } else {
-              setTitle(`Error!`);
-              setMessage(data.message);
+              setModalProps({ title: `Error!`, message: data.message, operation: OPERATION.INFO });
             }
 
             break;
@@ -141,15 +139,12 @@ function App() {
           }
             break;
           case MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM: {
+            setIsOpen(true)
             if (data.value) {
-              setOperation(OPERATION.INFO);
-              setTitle("Info")
-              setMessage("Operation completed successfully!");
+              setModalProps({ title: `Info`, message: "Operation completed successfully!", operation: OPERATION.INFO });
               setIsGamesPathSet(true)
             } else {
-              setOperation(OPERATION.INFO);
-              setTitle("Error")
-              setMessage(data.message);
+              setModalProps({ title: `Error!`, message: data.message, operation: OPERATION.INFO });
             }
           }
             break;
@@ -167,51 +162,16 @@ function App() {
 
   }, []);
 
-
-  const FooterOnClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    switch (event.currentTarget.id) {
-      case 'about':
-        setTitle(`About`);
-        setMessage(`This is the control panel of psx proxy server, changes are immediate, meaning you don't have to refresh the page to observe changes, new games will automatically pop up here, including any changes.`);
-        setOperation(OPERATION.INFO);
-        break;
-      case 'licensing':
-        setTitle(`Licensing`);
-        setMessage(`This software should be used as is, with the permission of the owner. All rights reserved.\n
-        Editing of assets, source code, reverse engineering are all prohibited under this license.\n
-        Contact the creator for any furthur inqueries "mez0ru@gmail.com".`);
-        setOperation(OPERATION.INFO);
-        break;
-      case 'set-games':
-        setPasscode('')
-        setTitle(`Change games.txt path`);
-        setMessage(`YOU MUST NOT CHANGE THE PATH, THIS IS THE ADMINISTRATOR'S JOB.`);
-        setOperation(OPERATION.INPUT);
-        socket?.send(JSON.stringify({ type: MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH }))
-        break;
-
-    }
-
-    setIsOpen(true);
-  }
-
   const addRequestedGame = (code: string, title: string) => {
     const game = requestedGames.find((e) => e.code === code) || {} as Game;
-    setOperation(OPERATION.ADD_GAME_TO_AUTO_UPDATES);
 
     if (!isGamesPathSet) {
-      setOperation(OPERATION.INFO);
-      setTitle(`Warning`);
-      setMessage(`games.txt path is not set, please update it first before you can add this game to the auto updates list.`);
+      setModalProps({ title: `Warning`, message: `games.txt path is not set, please update it first before you can add this game to the auto updates list.`, operation: OPERATION.INFO });
     }
     else if (game.auto_updates) {
-      setTitle(`Info`);
-      setMessage(`The game "${title}" is already added to auto update list.`);
-      setOperation(OPERATION.ADD_GAME_TO_AUTO_UPDATES);
+      setModalProps({ title: `Info`, message: `The game "${title}" is already added to auto update list.`, operation: OPERATION.INFO });
     } else {
-      setTitle(`Confirmation"`);
-      setMessage(`Are you sure you want to add ${title} to auto update list?`);
-      setOperation(OPERATION.ADD_GAME_TO_AUTO_UPDATES);
+      setModalProps({ title: `Confirmation`, message: `Are you sure you want to add ${title} to auto update list?`, operation: OPERATION.CONFIRMATION });
     }
 
     setSelectedGame(game)
@@ -225,42 +185,45 @@ function App() {
     }))
   }
 
-  const confirmGamesPath = () => {
-    socket?.send(JSON.stringify({
-      type: MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM,
-      passcode, value: path,
-    }))
-  }
+
 
   return (
     <div className="App">
       {/* <div className="hidden border-lime-700 : 'violet'}-700"></div> */}
       <div className="md:container md:mx-auto px-4 flex flex-col min-h-screen">
-        <header className="mt-5">
-          <div className="table mb-7">
-            <h1 className="text-2xl sm:text-3xl md:text-5xl table-cell font-['Montserrat']">PSX Proxy Application</h1><span className="text-sm md:text-base align-middle table-cell pl-3 text-slate-400 font-['Kanit'] tracking-wide">Version 2.0.0 Beta</span>
-          </div>
-          {!isJdownloaderRunning && <Alert message="JDownloader is not running!" />}
-          {!isGamesPathSet && <Alert level={4} message="games.txt path is not set, contact the person in charge to update it ASAP." />}
-        </header>
+        <SocketContext.Provider value={socket}>
+          <header className="mt-5">
+            <div className="table mb-7">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl table-cell font-['Montserrat']">PSX Proxy Application</h1><span className="text-sm md:text-base align-middle table-cell pl-3 text-slate-400 font-['Kanit'] tracking-wide">Version 2.0.0 Beta</span>
+            </div>
+            {!isJdownloaderRunning && <Alert message="JDownloader is not running!" />}
+            {!isGamesPathSet && <Alert level={4} message="games.txt path is not set, contact the person in charge to update it ASAP." />}
+          </header>
 
-        <section className={connected ? '' : 'm-auto'}>
-          {connected ?
-            <>
-              <h2 className="text-lg sm:text-xl md:my-3">Requested Games</h2>
-              <h3 className={`text-lg tracking-wide font-['Montserrat'] text-slate-500 text-center my-10 italic duration-500 transition-opacity ${requestedGames.length ? 'hidden' : ''}`}>Fresh! nothing to show here...<br />Start by using the PSX Proxy server.</h3>
-              <div className={`grid grid-cols-8c text-center gap-4 my-5 md:my-8 ml-3 duration-500 transition-opacity ${requestedGames.length ? '' : 'opacity-0'}`}>
-                {requestedGames.map((item, i) => (
-                  <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} onClick={addRequestedGame} />
-                ))}
-              </div>
-            </> : <Loading />
-          }
+          <section className={connected ? '' : 'm-auto'}>
+            {connected ?
+              <>
 
-        </section>
-        <Footer marginfull={connected} onClick={FooterOnClick} />
+                <MyModal messageProps={modalProps} isOpen={isOpen} setIsOpen={setIsOpen} confirmAction={confirmAddingGameToAutoUpdates} />
+                <h2 className="text-lg sm:text-xl md:my-3">Requested Games</h2>
+                <h3 className={`text-lg tracking-wide font-['Montserrat'] text-slate-500 text-center my-10 italic duration-1000 transition-opacity ${requestedGames.length ? 'hidden' : ''}`}>Fresh! nothing to show here...<br />Start by using the PSX Proxy server.</h3>
+                <div className={`grid grid-cols-8c text-center gap-4 my-5 md:my-8 ml-3 duration-1000 transition-opacity ${requestedGames.length ? '' : 'opacity-0'}`}>
+                  {requestedGames.map((item, i) => {
+                    return (
+                      <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} onClick={addRequestedGame} />
+                    )
+                  })
+                  }
+                </div>
+
+              </> : <Loading />
+            }
+
+          </section>
+          <Footer marginfull={connected} path={path} setPath={setPath} />
+        </SocketContext.Provider>
       </div>
-      <MyModal title={title} message={message} isOpen={isOpen} setIsOpen={setIsOpen} confirmAction={operation === OPERATION.INPUT ? confirmGamesPath : confirmAddingGameToAutoUpdates} isGameAdded={selectedGame.auto_updates || false} operation={operation} passcode={passcode} setPasscode={setPasscode} path={path} setPath={setPath} />
+
     </div>
   )
 }
