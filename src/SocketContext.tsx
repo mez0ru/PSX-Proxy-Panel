@@ -7,6 +7,12 @@ interface SocketContextProps {
     isConnected: boolean;
     isJdownloaderRunning: boolean;
     isGamesPathSet: boolean;
+    ProxyAddress: ProxyAddressProps;
+}
+
+interface ProxyAddressProps {
+    ip: string;
+    port: string;
 }
 
 export const SocketContext = createContext<SocketContextProps | undefined>(undefined);
@@ -21,6 +27,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
     const [isConnected, setIsConnected] = useState(false)
     const [isGamesPathSet, setIsGamesPathSet] = useState(true);
     const [isJdownloaderRunning, setIsJdownloaderRunning] = useState(true)
+    const [ProxyAddress, setProxyAddress] = useState<ProxyAddressProps>({ ip: "localhost", port: "8081" })
 
     useEffect(() => {
         let reconnectTimeout: NodeJS.Timeout
@@ -57,6 +64,9 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
                         if (data.value)
                             setIsGamesPathSet(true)
                         break;
+                    case MESSAGE_TYPES.PROXY_IP_ADDRESS:
+                        setProxyAddress({ ip: data.ip, port: data.port })
+                        break;
                     default:
                         break;
                 }
@@ -73,7 +83,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
         return connect();
     }, []);
 
-    return (<SocketContext.Provider value={{ socket, data: socketData, isConnected, isGamesPathSet, isJdownloaderRunning }}>
+    return (<SocketContext.Provider value={{ socket, data: socketData, isConnected, isGamesPathSet, isJdownloaderRunning, ProxyAddress }}>
         {children}
     </SocketContext.Provider>)
 }
