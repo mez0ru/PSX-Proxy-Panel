@@ -17,5 +17,5 @@ Eventually the old "Automatic game updates" standalone program will be migrated 
 for better maintability and better user experience.
 
 ## License
-Whatever license, the backend code is proprietary while the frontend is opensource; \
+Whatever license, the backend code is proprietary (for now) while the frontend is opensource; \
 however, leave credit where credit is due if you plan on using it.
