@@ -4,6 +4,7 @@ import Alert from './components/Alert'
 import { SocketProvider } from './SocketContext'
 import Games from './Games'
 import Header from './components/Header'
+import Logs from './Logs'
 
 export const MESSAGE_TYPES = {
   GAME: 1,
@@ -30,6 +31,7 @@ function App() {
         <SocketProvider>
           <Header />
           <Games />
+          {/* <Logs /> */}
           <Footer />
         </SocketProvider>
       </div>
