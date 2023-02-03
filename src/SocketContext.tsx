@@ -30,28 +30,25 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
     const [ProxyAddress, setProxyAddress] = useState<ProxyAddressProps>({ ip: "localhost", port: "8081" })
 
     useEffect(() => {
-        let reconnectTimeout: NodeJS.Timeout
+        let timeout = 125;
         function connect() {
             const sock = new WebSocket(`ws://${window.location.hostname}:8089`);
-            let cleared = false;
 
-            sock.addEventListener('open', (event) => {
-                if (reconnectTimeout)
-                    clearTimeout(reconnectTimeout)
+            function onOpen() {
+                timeout = 125;
                 setIsConnected(true);
                 sock.send(JSON.stringify({
                     type: MESSAGE_TYPES.GET_ALL_GAMES
                 }));
-            });
+            }
 
-            sock.addEventListener('close', (event) => {
+            function onClose() {
                 setIsConnected(false);
-                console.log('disconnected, will reconnect after 1s...');
-                if (!cleared)
-                    reconnectTimeout = setTimeout(connect, 1000)
-            });
+                console.log(`disconnected, will reconnect after ${timeout}ms...`);
+                setTimeout(connect, Math.min(20000, timeout += timeout));
+            }
 
-            sock.addEventListener('message', (event) => {
+            function onMessage(event: MessageEvent<any>) {
                 const data = JSON.parse(event.data)
                 switch (data.type) {
                     case MESSAGE_TYPES.ADD_GAME_TO_AUTO_UPDATES:
@@ -71,11 +68,19 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
                         break;
                 }
                 setSocketData(data)
-            });
+            }
+
+            sock.addEventListener('open', onOpen);
+
+            sock.addEventListener('close', onClose);
+
+            sock.addEventListener('message', onMessage);
             setSocket(sock);
 
             return () => {
-                cleared = true;
+                sock.removeEventListener('close', onClose);
+                sock.removeEventListener('message', onMessage);
+                sock.removeEventListener('open', onOpen);
                 sock.close();
             }
         }
