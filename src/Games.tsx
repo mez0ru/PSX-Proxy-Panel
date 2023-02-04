@@ -5,6 +5,7 @@ import { MESSAGE_TYPES } from './App';
 import { Loading } from './components/Loading';
 import GameCard from './components/GameCard';
 import not_found from './assets/not_found.svg'
+import { Switch } from '@headlessui/react';
 
 interface Game {
     name: string;
@@ -12,6 +13,7 @@ interface Game {
     region: number;
     image?: string;
     auto_updates?: boolean;
+    game_found?: boolean;
     full_game?: boolean;
     downloads?: number;
     version: string;
@@ -30,6 +32,7 @@ export default function Games() {
     const [modalProps, setModalProps] = useState<MessageProps>({ title: '', message: '', operation: 0 })
     const [isOpen, setIsOpen] = useState(false)
     const [selectedGame, setSelectedGame] = useState<Game>()
+    const [failsafe, setFailsafe] = useState(false)
 
     useEffect(() => {
         switch (socketProvider?.data?.type) {
@@ -75,6 +78,7 @@ export default function Games() {
                 socketProvider?.data.games.map((game_unmodified: Game_From_Server) => {
                     setRequestedGames(oldArray => [...oldArray, game_unmodified.game])
                 })
+                setFailsafe(socketProvider?.data.failSafeMode)
             }
                 break;
             case MESSAGE_TYPES.ADD_GAME_TO_AUTO_UPDATES:
@@ -145,9 +149,9 @@ export default function Games() {
         }
         else if (game.auto_updates) {
             // setModalProps({ title: `Info`, message: `The game "${title}" is already added to auto update list.`, operation: OPERATION.INFO });
-            setModalProps({ title: `Confirmation`, message: `Are you sure you want to remove "${title}" from auto update list?`, operation: OPERATION.CONFIRMATION });
+            setModalProps({ title: `Remove Game`, message: `Are you sure you want to remove "${title}" from auto update list?`, operation: OPERATION.CONFIRMATION });
         } else {
-            setModalProps({ title: `Confirmation`, message: `Are you sure you want to add "${title}" to auto update list?`, operation: OPERATION.CONFIRMATION });
+            setModalProps({ title: `Add Game`, message: `Are you sure you want to add "${title}" to auto update list?`, operation: OPERATION.CONFIRMATION });
         }
 
         setSelectedGame(game)
@@ -162,18 +166,47 @@ export default function Games() {
         }))
     }
 
+    const changeFailsafeMode = (e: boolean) => {
+        if (e) {
+            setModalProps({ title: "Warning", message: "This feature lets you serve any game or update, even if they don't exist on the hard drive, they will still be served from the internet. This should not be enabled unless ABSOLUTELY NECESSERY, if you are done serving a customer, don't forget to disable this.", operation: OPERATION.INFO });
+            setIsOpen(true);
+        }
+        setFailsafe(e);
+        socketProvider?.socket?.send(JSON.stringify({
+            type: MESSAGE_TYPES.CHANGE_FAILSAFE_MODE,
+            value: e,
+        }))
+    }
+
     return <Loading isLoading={socketProvider?.isConnected ? false : true}>
         <MyModal messageProps={modalProps} isOpen={isOpen} setIsOpen={setIsOpen} confirmAction={confirmChangingGameAutoUpdates} />
-        <h2 className="text-lg sm:text-xl md:mb-3">Requested Games</h2>
+        <div className='table md:mb-3'>
+            <h2 className="text-lg sm:text-xl align-middle table-cell">Requested Games</h2>
+            <Switch.Group>
+                <div className="flex items-center table-cell pl-7 pt-1">
+                    <Switch.Label className="mr-3 font-['Kanit'] text-slate-500">Failsafe Mode</Switch.Label>
+                    <Switch
+                        checked={failsafe}
+                        onChange={changeFailsafeMode}
+                        className={`${failsafe ? 'bg-blue-600' : 'bg-gray-200'
+                            } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 align-middle`}
+                    >
+                        <span
+                            className={`${failsafe ? 'translate-x-6' : 'translate-x-1'
+                                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                        />
+                    </Switch>
+                </div>
+            </Switch.Group>
+        </div>
         <h3 className={`text-lg tracking-wide font-['Montserrat'] text-slate-500 text-center my-10 italic duration-1000 transition-opacity ${requestedGames.length ? 'hidden' : ''}`}>Fresh! nothing to show here...<br />Start by using the PSX Proxy server.</h3>
         <div className={`grid grid-cols-8c text-center gap-4 my-5 md:my-8 ml-3 duration-1000 transition-opacity ${requestedGames.length ? '' : 'opacity-0'}`}>
             {requestedGames.map((item, i) => {
                 return (
-                    <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} onClick={ChangeGameAutoUpdates} />
+                    <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} game_found={item.game_found ?? false} onClick={ChangeGameAutoUpdates} />
                 )
             })
             }
         </div>
     </Loading>
-
 }
