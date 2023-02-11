@@ -168,7 +168,7 @@ export default function Games() {
 
     const changeFailsafeMode = (e: boolean) => {
         if (e) {
-            setModalProps({ title: "Warning", message: "This feature lets you serve any game or update, even if they don't exist on the hard drive, they will still be served from the internet. This should not be enabled unless ABSOLUTELY NECESSERY, if you are done serving a customer, don't forget to disable this.", operation: OPERATION.INFO });
+            setModalProps({ title: "Warning", message: "This feature lets you serve any game or update, even if they don't exist on the hard drive, they will still be served from the internet. This should not be enabled unless ABSOLUTELY NECESSARY, if you are done serving a customer, don't forget to disable this.", operation: OPERATION.INFO });
             setIsOpen(true);
         }
         setFailsafe(e);

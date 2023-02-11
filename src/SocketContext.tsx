@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useRef } from 'react';
 import { MESSAGE_TYPES } from './App';
 
 interface SocketContextProps {
@@ -8,6 +8,7 @@ interface SocketContextProps {
     isJdownloaderRunning: boolean;
     isGamesPathSet: boolean;
     ProxyAddress: ProxyAddressProps;
+    currentVersion: string;
 }
 
 interface ProxyAddressProps {
@@ -28,6 +29,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
     const [isGamesPathSet, setIsGamesPathSet] = useState(true);
     const [isJdownloaderRunning, setIsJdownloaderRunning] = useState(true)
     const [ProxyAddress, setProxyAddress] = useState<ProxyAddressProps>({ ip: "localhost", port: "8081" })
+    const currentVersion = useRef<string | null>(null)
 
     useEffect(() => {
         let timeout = 125;
@@ -56,6 +58,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
                         break;
                     case MESSAGE_TYPES.GET_ALL_GAMES:
                         setIsGamesPathSet(data.is_games_path_set);
+                        currentVersion.current = data.version;
                         break;
                     case MESSAGE_TYPES.SET_AUTOUPDATES_GAMES_TXT_PATH_CONFIRM:
                         if (data.value)
@@ -64,6 +67,8 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
                     case MESSAGE_TYPES.PROXY_IP_ADDRESS:
                         setProxyAddress({ ip: data.ip, port: data.port })
                         break;
+                    case MESSAGE_TYPES.APP_UPDATE:
+                        close();
                     default:
                         break;
                 }
@@ -88,7 +93,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
         return connect();
     }, []);
 
-    return (<SocketContext.Provider value={{ socket, data: socketData, isConnected, isGamesPathSet, isJdownloaderRunning, ProxyAddress }}>
+    return (<SocketContext.Provider value={{ socket, data: socketData, isConnected, isGamesPathSet, isJdownloaderRunning, ProxyAddress, currentVersion: currentVersion.current ?? '2.0.0' }}>
         {children}
-    </SocketContext.Provider>)
+    </SocketContext.Provider >)
 }
