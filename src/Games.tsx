@@ -21,11 +21,6 @@ interface Game {
 
 const REGION_STRING = ["SA", "US", "JP"];
 
-interface Game_From_Server {
-    type: number;
-    game: Game;
-}
-
 export default function Games() {
     const socketProvider = useContext(SocketContext);
     const [requestedGames, setRequestedGames] = useState([] as Game[])
@@ -62,7 +57,8 @@ export default function Games() {
                     let newArray = [...oldArray]
                     const game_index = newArray.findIndex((e) => e.code === game.code);
                     if (game_index !== -1) {
-                        newArray[game_index].image = game.image;
+                        if (!newArray[game_index].image)
+                            newArray[game_index].image = game.image;
                         return newArray
                     } else {
                         if (newArray.length > 29)
@@ -74,10 +70,9 @@ export default function Games() {
                 break;
             case MESSAGE_TYPES.GET_ALL_GAMES: {
                 console.log('GET_ALL_GAMES')
-                setRequestedGames([])
-                socketProvider?.data.games.map((game_unmodified: Game_From_Server) => {
-                    setRequestedGames(oldArray => [...oldArray, game_unmodified.game])
-                })
+
+                setRequestedGames(socketProvider?.data.games)
+
                 setFailsafe(socketProvider?.data.failSafeMode)
             }
                 break;
@@ -203,7 +198,7 @@ export default function Games() {
         <div className={`grid grid-cols-8c text-center gap-4 my-5 md:my-8 ml-3 duration-1000 transition-opacity ${requestedGames.length ? '' : 'opacity-0'}`}>
             {requestedGames.map((item, i) => {
                 return (
-                    <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} game_found={item.game_found ?? false} onClick={ChangeGameAutoUpdates} />
+                    <GameCard key={i} name={item.name} version={item.version} image={item.image ? item.image : not_found} code={item.code} downloads={item?.downloads} full_game={item.full_game} auto_updates={item?.auto_updates} region={REGION_STRING[item.region]} game_found={item.game_found} onClick={ChangeGameAutoUpdates} />
                 )
             })
             }
