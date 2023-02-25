@@ -35,15 +35,15 @@ export default function Games() {
                 console.log('GAME')
                 const game = socketProvider?.data.game as Game;
                 setRequestedGames(oldArray => {
-                    let newArray = [...oldArray]
-                    const game_index = newArray.findIndex((e) => e.code === game.code);
+                    const game_index = oldArray.findIndex((e) => e.code === game.code);
                     if (game_index !== -1) {
-                        newArray[game_index] = game;
-                        return newArray
+                        oldArray[game_index] = game;
+                        return oldArray
                     } else {
-                        if (newArray.length > 29)
-                            newArray.shift()
-                        return [...newArray, game]
+                        if (oldArray.length > 29)
+                            oldArray.shift()
+                        oldArray.push(game)
+                        return [...oldArray]
                     }
                 })
             }
@@ -54,45 +54,39 @@ export default function Games() {
             case MESSAGE_TYPES.GAME_ICON: {
                 const game = socketProvider?.data.game as Game;
                 setRequestedGames(oldArray => {
-                    let newArray = [...oldArray]
-                    const game_index = newArray.findIndex((e) => e.code === game.code);
+                    const game_index = oldArray.findIndex((e) => e.code === game.code);
                     if (game_index !== -1) {
-                        if (!newArray[game_index].image)
-                            newArray[game_index].image = game.image;
-                        return newArray
+                        if (!oldArray[game_index].image) {
+                            oldArray[game_index].image = game.image;
+                            return [...oldArray]
+                        }
+                        return oldArray
                     } else {
-                        if (newArray.length > 29)
-                            newArray.shift()
-                        return [...newArray, game]
+                        if (oldArray.length > 30)
+                            oldArray.shift()
+                        return [...oldArray, game]
                     }
                 })
             }
                 break;
             case MESSAGE_TYPES.GET_ALL_GAMES: {
-                console.log('GET_ALL_GAMES')
-
                 setRequestedGames(socketProvider?.data.games)
-
                 setFailsafe(socketProvider?.data.failSafeMode)
             }
                 break;
             case MESSAGE_TYPES.ADD_GAME_TO_AUTO_UPDATES:
                 if (socketProvider?.data.value) {
-                    setRequestedGames(oldArray => {
-                        let newArray = [...oldArray]
-                        const game = newArray.find((e) => e.code === socketProvider?.data.code);
-                        if (game != undefined) {
-                            game.auto_updates = true;
-                            if (selectedGame && modalProps.message === `Are you sure you want to add "${game.name}" to auto update list?`) {
-                                setTimeout(() => {
-                                    setModalProps({ title: `Info`, message: `Congratulations, the game is added successfully, from now on, the game is going to be automatically updated!`, operation: OPERATION.INFO });
-                                    setSelectedGame(undefined)
-                                    setIsOpen(true)
-                                }, 130);
-                            }
+                    const game = requestedGames.find((e) => e.code === socketProvider?.data.code);
+                    if (game != undefined) {
+                        game.auto_updates = true;
+                        if (selectedGame && modalProps.message === `Are you sure you want to add "${game.name}" to auto update list?`) {
+                            setTimeout(() => {
+                                setModalProps({ title: `Info`, message: `Congratulations, the game is added successfully, from now on, the game is going to be automatically updated!`, operation: OPERATION.INFO });
+                                setSelectedGame(undefined)
+                                setIsOpen(true)
+                            }, 130);
                         }
-                        return newArray
-                    })
+                    }
                 } else {
                     if (selectedGame) {
 
@@ -106,21 +100,17 @@ export default function Games() {
                 break;
             case MESSAGE_TYPES.REMOVE_GAME_FROM_AUTO_UPDATES:
                 if (socketProvider?.data.value) {
-                    setRequestedGames(oldArray => {
-                        let newArray = [...oldArray]
-                        const game = newArray.find((e) => e.code === socketProvider?.data.code);
-                        if (game != undefined) {
-                            game.auto_updates = false;
-                            if (selectedGame && modalProps.message === `Are you sure you want to remove "${game.name}" from auto update list?`) {
-                                setTimeout(() => {
-                                    setModalProps({ title: `Info`, message: `Removed "${game.name}" successfully from the auto update list.`, operation: OPERATION.INFO });
-                                    setSelectedGame(undefined)
-                                    setIsOpen(true)
-                                }, 130);
-                            }
+                    const game = requestedGames.find((e) => e.code === socketProvider?.data.code);
+                    if (game != undefined) {
+                        game.auto_updates = false;
+                        if (selectedGame && modalProps.message === `Are you sure you want to remove "${game.name}" from auto update list?`) {
+                            setTimeout(() => {
+                                setModalProps({ title: `Info`, message: `Removed "${game.name}" successfully from the auto update list.`, operation: OPERATION.INFO });
+                                setSelectedGame(undefined)
+                                setIsOpen(true)
+                            }, 130);
                         }
-                        return newArray
-                    })
+                    }
                 } else {
                     if (selectedGame) {
                         setTimeout(() => {
@@ -178,7 +168,7 @@ export default function Games() {
         <div className='table md:mb-3'>
             <h2 className="text-lg sm:text-xl align-middle table-cell">Requested Games</h2>
             <Switch.Group>
-                <div className="flex items-center table-cell pl-7 pt-1">
+                <div className="items-center table-cell pl-7 pt-1">
                     <Switch.Label className="mr-3 font-['Kanit'] text-slate-500">Failsafe Mode</Switch.Label>
                     <Switch
                         checked={failsafe}
