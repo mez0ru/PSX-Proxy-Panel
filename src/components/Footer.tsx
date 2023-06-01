@@ -2,6 +2,8 @@ import { useState, useContext, useEffect } from 'react'
 import { MESSAGE_TYPES } from '../App';
 import { SocketContext } from '../SocketContext';
 import { MessageProps, OPERATION, SetGamesPathModal } from './SetGamesPathModal';
+import { Link } from 'react-router-dom';
+import { useCurrentPath } from '../hooks/useCurrentPath';
 
 export default function Footer() {
     const [passcode, setPasscode] = useState('')
@@ -9,6 +11,7 @@ export default function Footer() {
     const [isOpen, setIsOpen] = useState(false)
     const [modalProps, setModalProps] = useState<MessageProps>({ title: '', message: '', operation: 0 })
     const socketProvider = useContext(SocketContext)
+    const currentPath = useCurrentPath();
 
     useEffect(() => {
         switch (socketProvider?.data?.type) {
@@ -74,6 +77,12 @@ export default function Footer() {
                 </li>
                 <li>
                     <a id="licensing" href="#" className="mr-4 hover:underline md:mr-6" onClick={FooterOnClick}>Licensing</a>
+                </li>
+                <li className={`${currentPath === 'logs' ? 'hidden' : ''}`}>
+                    <Link to={`logs`} className='mr-4 hover:underline md:mr-6'>Logs</Link>
+                </li>
+                <li className={`${currentPath === '/' ? 'hidden' : ''}`}>
+                    <Link to={`/`} className='mr-4 hover:underline md:mr-6'>Home</Link>
                 </li>
             </ul>
         </footer>

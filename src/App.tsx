@@ -5,6 +5,8 @@ import { SocketProvider } from './SocketContext'
 import Games from './Games'
 import Header from './components/Header'
 import Logs from './Logs'
+import Serving from './Serving'
+import { Outlet } from 'react-router-dom'
 
 export const MESSAGE_TYPES = {
   GAME: 1,
@@ -31,8 +33,7 @@ function App() {
       <div className="md:container md:mx-auto px-4 flex flex-col min-h-screen">
         <SocketProvider>
           <Header />
-          <Games />
-          {/* <Logs /> */}
+          <Outlet />
           <Footer />
         </SocketProvider>
       </div>

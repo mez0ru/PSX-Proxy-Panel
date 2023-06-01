@@ -39,9 +39,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
             function onOpen() {
                 timeout = 125;
                 setIsConnected(true);
-                sock.send(JSON.stringify({
-                    type: MESSAGE_TYPES.GET_ALL_GAMES
-                }));
+
             }
 
             function onClose() {

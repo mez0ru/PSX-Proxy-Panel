@@ -40,7 +40,7 @@ export default function GameCard({ name, code, image, version, full_game = false
     }, [])
 
     return (
-        <div ref={cardRef} onTransitionEnd={transitionEnd} className={`shadow-lg rounded-[7px] ${auto_updates ? 'border-lime-700' : 'border-violet-700'} border-2 pb-3 hover:shadow-xl group relative ${auto_updates ? 'hover:bg-lime-700' : 'hover:bg-violet-700'} hover:text-white hover:-translate-y-1 hover:scale-102 cursor-pointer transition-all duration-1000 ${show ? 'opacity-100' : 'opacity-0'}`} onMouseEnter={onHover} onMouseLeave={onHover} onClick={() => onClick(code, name)}>
+        <div ref={cardRef} onTransitionEnd={transitionEnd} className={`shadow-lg rounded-[7px] ${auto_updates ? 'border-lime-700' : 'border-violet-700'} shrink-0 w-[150px] border-2 pb-3 hover:shadow-xl group relative ${auto_updates ? 'hover:bg-lime-700' : 'hover:bg-violet-700'} hover:text-white hover:-translate-y-1 hover:scale-102 cursor-pointer transition-all duration-1000 ${show ? 'opacity-100' : 'opacity-0'}`} onMouseEnter={onHover} onMouseLeave={onHover} onClick={() => onClick(code, name)}>
             <img src={image} alt={`${name} Cover`} className='rounded-t-[5px] mb-3' />
             <Transition appear show={game_found !== undefined && !game_found && auto_updates} enter="ease-out duration-300"
                 enterFrom="opacity-0"

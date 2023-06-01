@@ -42,10 +42,13 @@ export default function Logs() {
     }
 
     return (<>
+        <div className='table md:mb-3'>
+            <h2 className="text-lg sm:text-xl text-gray-700">Search Logs</h2>
+        </div>
         <div className='grid grid-cols-6 grid-rows-2 mt-5 gap-4'>
             <Listbox value={selectedLevel} onChange={setSelectedLevel}>
                 <div className="relative mt-1">
-                    <Listbox.Button className="z-10 relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                    <Listbox.Button className="z-10 relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-purple-300 sm:text-sm">
                         <span className="block truncate">{selectedLevel.name}</span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                             <ChevronUpDownIcon
@@ -65,7 +68,7 @@ export default function Logs() {
                                 <Listbox.Option
                                     key={personIdx}
                                     className={({ active }) =>
-                                        `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
+                                        `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? 'bg-purple-100 text-purple-900' : 'text-gray-900'
                                         }`
                                     }
                                     value={person}
@@ -79,7 +82,7 @@ export default function Logs() {
                                                 {person.name}
                                             </span>
                                             {selected ? (
-                                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-purple-600">
                                                     <CheckIcon className="h-5 w-5" aria-hidden="true" />
                                                 </span>
                                             ) : null}
@@ -114,6 +117,9 @@ export default function Logs() {
                         <th scope="col" className="px-6 py-3">
                             Level
                         </th>
+                        <th scope="col" className="px-6 py-3">
+                            Date
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,7 +129,7 @@ export default function Logs() {
                                 <th scope="row" className="px-6 py-4 ">
                                     {item.id}
                                 </th>
-                                <td className="px-6 py-4 font-medium text-gray-900 break-word">
+                                <td className="px-6 py-4 font-medium text-gray-900 w-3/4">
                                     {item.message}
                                 </td>
                                 <td className="px-6 py-4 break-word">
@@ -131,6 +137,9 @@ export default function Logs() {
                                 </td>
                                 <td className={`px-6 py-4 font-medium ${LEVEL_COLOR[item.level]} font-bold whitespace-nowrap`}>
                                     {LEVEL[item.level]}
+                                </td>
+                                <td className={`px-6 py-4 font-medium [word-spacing:9999px]`}>
+                                    {item.created_at}
                                 </td>
                             </tr>)
                         })
