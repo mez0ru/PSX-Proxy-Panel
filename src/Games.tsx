@@ -281,8 +281,8 @@ export default function Games() {
                 </div>
             </Switch.Group>
         </div>
-        <h3 className={`text-lg tracking-wide font-['Montserrat'] text-slate-500 text-center my-10 italic duration-1000 transition-opacity ${requestedGames.filter((e) => e.code.startsWith('C')).length ? 'hidden' : ''}`}>No PS4 game was detected yet, start by using the PSX Proxy server.</h3>
         <h3 className={`text-4xl tracking-wide font-['PsFont'] mt-3 duration-1000 transition-opacity`}>PS4:</h3>
+        <h3 className={`text-lg tracking-wide font-['Montserrat'] text-slate-500 text-center my-10 italic duration-1000 transition-opacity ${requestedGames.filter((e) => e.code.startsWith('C')).length ? 'hidden' : ''}`}>No PS4 game was detected yet, start by using the PSX Proxy server.</h3>
         <div className={`flex flex-row text-center overflow-auto gap-4 py-2 my-5 md:my-3 ml-3 duration-1000 transition-opacity ${requestedGames.filter((e) => e.code.startsWith('C')).length ? '' : 'opacity-0'}`}>
             {requestedGames.map((item, i) => {
                 if (item.code.startsWith('C')) {
