@@ -52,7 +52,6 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
                 const data = JSON.parse(event.data)
                 switch (data.type) {
                     case MESSAGE_TYPES.ADD_GAME_TO_AUTO_UPDATES:
-                        console.log('ADD_GAME_TO_AUTO_UPDATES in provider')
                         break;
                     case MESSAGE_TYPES.GET_ALL_GAMES:
                         setIsGamesPathSet(data.is_games_path_set);

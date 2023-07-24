@@ -4,7 +4,6 @@ import Serving from './Serving'
 
 export default function Home() {
     return (<>
-        <Games />
-        <Serving /></>
+        <Games /></>
     )
 }
